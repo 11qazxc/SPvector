@@ -12,19 +12,20 @@ You should have received a copy of the GNU General Public License along with thi
     <div id="applyButton" style="width:50px;height:20px;" onclick="recalculate()">apply</div>
     <input type="text" id="output"></input>
 <script type="text/javascript">
-str=(v)=>v.toFixed(4)
-line_segment=(pa,pb)=>{
-    r="";pipeLen=1;a=M.atan2(pb[1]-pa[1],pb[0]-pa[0])
+str=(v)=>(M.round(v*1000)/1000).toString()
+line_segment=(pa,pb,restoreState)=>{
+    r="";pipeLen=.5;a=M.atan2(pb[1]-pa[1],pb[0]-pa[0])
     dx=M.cos(a)*pipeLen;dy=M.sin(a)*pipeLen
     if(dy==0){l=(pb[0]-pa[0])/dx}else if(dx==0){l=(pb[1]-pa[1])/dy}
     else{l=M.max((pb[0]-pa[0])/dx,(pb[1]-pa[1])/dy)}
     l=M.ceil(l)
     sx=pa[0]+dx*.5;sy=pa[1]+dy*.5;dx=(pb[0]-pa[0])/l;dy=(pb[1]-pa[1])/l
-    r+=`<mspace=${str(dx)}em><pos=${str(sx)}><rotate=${str(a/M.PI*180+90)}>`
+    r+=`<mspace=${str(dx)}em><pos=${str(sx)}em><rotate=${str(a/M.PI*180+90)}>`
     if(pa[1]!==pb[1]){
         for(let i=0;i<l;(sy+=dy)&&(i+=1)){r+=`<voffset=${str(sy)}em>|`}
     }else{r+="|".repeat(l)}
-    r+=`</rotate></voffset></mspace>`
+    r+=`</rotate>`
+    if(restoreState!==false){r+=`</voffset></mspace>`}
     return r
 }
 line=(s)=>{
@@ -33,8 +34,23 @@ line=(s)=>{
         e=e.split(",")
         pts.push([Number(e[0]),Number(e[1])])
     })
-    for(let i=0;i<(pts.length-1);i+=1){r+=line_segment(pts[i],pts[i+1])}
+    for(let i=0;i<(pts.length-1);i+=1){
+        r+=line_segment(pts[i],pts[i+1],false)
+    }
+    r+=`</mspace></voffset>`
     return r
+}
+
+recalculate=()=>{
+    prog=$("[id='prog']").value.split("\n")
+    r="<align=left><size=20%><line-height=1em>"
+    prog.forEach((e)=>{
+        i=e.indexOf(" ")
+        if(i==-1){return}
+        f=e.slice(0,i)
+        if(f=="line"){r+=line(e.slice(i+1))}
+    })
+    $("[id='output']").value=r
 }
 </script>
 </body>
