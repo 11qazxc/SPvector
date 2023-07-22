@@ -1,0 +1,40 @@
+<head>
+<title>SPvector.</title><meta charset="UTF-8">
+<meta name="author" content="11qazxc">
+<meta name="date" content="2023-07-22">
+<link rel="license" href="https://www.gnu.org/licenses/gpl-3.0.html">
+<div style="font-size:5px;color:#0008;">This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.<br />
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.<br />
+You should have received a copy of the GNU General Public License along with this program. If not, see https://www.gnu.org/licenses/ .</div>
+</head>
+<body onload="window.$=document.querySelector.bind(document);window.M=Math;">
+    <textarea id="prog" cols="80" rows="24"></textarea>
+    <div id="applyButton" style="width:50px;height:20px;" onclick="recalculate()">apply</div>
+    <input type="text" id="output"></input>
+<script type="text/javascript">
+str=(v)=>v.toFixed(4)
+line_segment=(pa,pb)=>{
+    r="";pipeLen=1;a=M.atan2(pb[1]-pa[1],pb[0]-pa[0])
+    dx=M.cos(a)*pipeLen;dy=M.sin(a)*pipeLen
+    if(dy==0){l=(pb[0]-pa[0])/dx}else if(dx==0){l=(pb[1]-pa[1])/dy}
+    else{l=M.max((pb[0]-pa[0])/dx,(pb[1]-pa[1])/dy)}
+    l=M.ceil(l)
+    sx=pa[0]+dx*.5;sy=pa[1]+dy*.5;dx=(pb[0]-pa[0])/l;dy=(pb[1]-pa[1])/l
+    r+=`<mspace=${str(dx)}em><pos=${str(sx)}><rotate=${str(a/M.PI*180+90)}>`
+    if(pa[1]!==pb[1]){
+        for(let i=0;i<l;(sy+=dy)&&(i+=1)){r+=`<voffset=${str(sy)}em>|`}
+    }else{r+="|".repeat(l)}
+    r+=`</rotate></voffset></mspace>`
+    return r
+}
+line=(s)=>{
+    pts=[];r=""
+    s.split(" ").forEach((e)=>{
+        e=e.split(",")
+        pts.push([Number(e[0]),Number(e[1])])
+    })
+    for(let i=0;i<(pts.length-1);i+=1){r+=line_segment(pts[i],pts[i+1])}
+    return r
+}
+</script>
+</body>
