@@ -10,6 +10,7 @@ You should have received a copy of the GNU General Public License along with thi
 <body onload="window.$=document.querySelector.bind(document);window.M=Math;">
     <code>#a b</code> sets a to b<br />
     <code>line x,y,x,y...</code><br />
+    <code>TODO:area y0;y1;xs;xf</code>fills area with y0 and y1 being top and buttom edges; xs and xf are expressions to define left and right limits as functions of y<br />
     <textarea id="prog" cols="80" rows="24"></textarea>
     <div id="applyButton" style="width:50px;height:20px;" onclick="recalculate()">apply</div>
     <input type="text" id="output"></input>
@@ -39,6 +40,18 @@ line=(s)=>{
     return r
 }
 
+area=(s)=>{
+    const ulWidth=1/13.25;const ulS=" ";const ulF="."
+    args=s.split(";")
+    y0=eval(args[0]);y1=eval(args[1]);fxs=args[2];fxf=args[3]
+    r=`<line-height=${str(y0)}em><br><line-height=${str(ulWidth)}em><mspace=0.00001em><u>`
+    for(let y=y0;y<=y1;y+=ulWidth){
+        r+=`<pos=${str(eval(fxs))}em>${ulS}`
+        r+=`<pos=${str(eval(fxf))}em>${ulF}<br>`
+    }
+    r+=`</u></mspace><line-height=${str(-(y1-y0))}em><br><line-height=1em>`
+    return r
+}
 
 recalculate=()=>{
     prog=$("[id='prog']").value.split("\n")
@@ -51,6 +64,7 @@ recalculate=()=>{
             console.log(`window.${f.slice(1)}=${e.slice(i+1)}`)
                    eval(`window.${f.slice(1)}=${e.slice(i+1)}`)}
         if(f=="line"){r+=line(e.slice(i+1))}
+        if(f=="area"){r+=area(e.slice(i+1))}
     })
     $("[id='output']").value=r
 }
