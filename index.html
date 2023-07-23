@@ -1,5 +1,5 @@
 <head>
-<title>SPvector.</title><meta charset="UTF-8">
+<title>SPvector</title><meta charset="UTF-8">
 <meta name="author" content="11qazxc">
 <meta name="date" content="2023-07-22">
 <link rel="license" href="https://www.gnu.org/licenses/gpl-3.0.html">
@@ -8,6 +8,8 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU General Public License along with this program. If not, see https://www.gnu.org/licenses/ .</div>
 </head>
 <body onload="window.$=document.querySelector.bind(document);window.M=Math;">
+    <code>#a b</code> sets a to b<br />
+    <code>line x,y,x,y...</code><br />
     <textarea id="prog" cols="80" rows="24"></textarea>
     <div id="applyButton" style="width:50px;height:20px;" onclick="recalculate()">apply</div>
     <input type="text" id="output"></input>
@@ -29,17 +31,14 @@ line_segment=(pa,pb,restoreState)=>{
     return r
 }
 line=(s)=>{
-    pts=[];r=""
-    s.split(" ").forEach((e)=>{
-        e=e.split(",")
-        pts.push([Number(e[0]),Number(e[1])])
-    })
-    for(let i=0;i<(pts.length-1);i+=1){
-        r+=line_segment(pts[i],pts[i+1],false)
+    r="";pts=eval("["+s+"]")
+    for(let i=0;(i+3)<pts.length;i+=2){
+        r+=line_segment([pts[i],pts[i+1]],[pts[i+2],pts[i+3]],false)
     }
     r+=`</mspace></voffset>`
     return r
 }
+
 
 recalculate=()=>{
     prog=$("[id='prog']").value.split("\n")
@@ -48,6 +47,9 @@ recalculate=()=>{
         i=e.indexOf(" ")
         if(i==-1){return}
         f=e.slice(0,i)
+        if(f[0]=="#"){
+            console.log(`window.${f.slice(1)}=${e.slice(i+1)}`)
+                   eval(`window.${f.slice(1)}=${e.slice(i+1)}`)}
         if(f=="line"){r+=line(e.slice(i+1))}
     })
     $("[id='output']").value=r
