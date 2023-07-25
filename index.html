@@ -11,18 +11,23 @@ You should have received a copy of the GNU General Public License along with thi
     <code>#a b</code> sets a to b<br />
     <code>line x,y,x,y...</code><br />
     <code>area y0;y1;xs;xf</code>fills area with y0 and y1 being top and buttom edges; xs and xf are expressions to define left and right limits as functions of y<br />
-    <textarea id="prog" cols="80" rows="24"></textarea>
+    <textarea id="prog" cols="80" rows="24">
+line 0,0, 0,5, 5,5, 5,0, 0,0, 5,5
+area 0;5; 10-y;M.sqrt(1-M.pow((y-2.5)/2.5,2))*2.5
+    </textarea>
     <div id="applyButton" style="width:50px;height:20px;" onclick="recalculate()">apply</div>
     <input type="text" id="output"></input>
 <script type="text/javascript">
 str=(v)=>(M.round(v*1000)/1000).toString()
 line_segment=(pa,pb,restoreState)=>{
-    r="";pipeLen=.9375;a=M.atan2(pb[1]-pa[1],pb[0]-pa[0])
+    r="";pipeLen=1;a=M.atan2(pb[1]-pa[1],pb[0]-pa[0])
     dx=M.cos(a)*pipeLen;dy=M.sin(a)*pipeLen
     if(dy==0){l=(pb[0]-pa[0])/dx}else if(dx==0){l=(pb[1]-pa[1])/dy}
     else{l=M.max((pb[0]-pa[0])/dx,(pb[1]-pa[1])/dy)}
     l=M.ceil(l)
-    sx=pa[0]+dx*.5;sy=pa[1]+dy*.5;dx=(pb[0]-pa[0])/l;dy=(pb[1]-pa[1])/l
+    sx=pa[0]+dx*.5-.5*M.cos(a)
+    sy=pa[1]+dy*.5-.5*M.abs(M.sin(a))
+    dx=(pb[0]-pa[0])/l;dy=(pb[1]-pa[1])/l
     //mspace==0 means mspace's off
     r+=`<mspace=${dx!=0?str(dx):"0.00001"}em><pos=${str(sx)}em><rotate=${str(a/M.PI*180+90)}>`
     if(pa[1]!==pb[1]){
@@ -42,15 +47,15 @@ line=(s)=>{
 }
 
 area=(s)=>{
-    const ulWidth=.14;const ulS=" ";const ulF="."
+    const ulWidth=1/13.25;const ulS=" ";const ulF="."
     args=s.split(";")
     y0=eval(args[0]);y1=eval(args[1]);fxs=args[2];fxf=args[3]
-    r=`<line-height=${str(y0)}em><br><line-height=${str(ulWidth)}em><mspace=0.00001em><u>`
+    r=`<line-height=${str(-y0)}em><br><line-height=${str(-ulWidth)}em><mspace=0.00001em><u><#0000>`
     for(let y=y0;y<=y1;y+=ulWidth){
         r+=`<pos=${str(eval(fxs))}em>${ulS}`
         r+=`<pos=${str(eval(fxf))}em>${ulF}<br>`
     }
-    r+=`</u></mspace><line-height=${str(-(y1-y0))}em><br><line-height=1em>`
+    r+=`</color></u></mspace><line-height=${str((y1-y0))}em><br><line-height=1em>`
     return r
 }
 
