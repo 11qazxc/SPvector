@@ -5,8 +5,9 @@ const line_segment=(pa,pb,restoreState)=>{
     if(dy==0){l=(pb[0]-pa[0])/dx}else if(dx==0){l=(pb[1]-pa[1])/dy}
     else{l=max((pb[0]-pa[0])/dx,(pb[1]-pa[1])/dy)}
     l=(l|0)+1
-    let sx=pa[0],sy=pa[1]-(.5-.5*sin(a))
-    dx=(pb[0]-pa[0])/l;dy=(pb[1]-pa[1]-dy/l)/l
+    let sx=pa[0],sy=pa[1]-pipeLen*(.5-.5*sin(a))
+    dx=(pb[0]-pa[0])/l;dy=(pb[1]-pa[1]-.5*dy/l)/l
+    if(pa[1]!=pb[1]){dx/=(pb[1]-pa[1])/(pb[1]-pa[1]-.5*dy/l)}
     //mspace==0 means mspace's off
     r+=`<mspace=${dx!=0?dx.s():"0.00001"}em><pos=${sx.s()}em><rotate=${(a/PI*180+90).s()}>`
     if(pa[1]!==pb[1]){

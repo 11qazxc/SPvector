@@ -1,9 +1,9 @@
 fx["area"]={f:(s)=>{
     const ulWidth=1/13.25;const ulS=" ";const ulF="."
-    args=s.split(";")
+    let args=s.split(";")
     let y0,y1
     with (window.lns) y0=eval(args[0]),y1=eval(args[1]);fxs=args[2];fxf=args[3]
-    r=`<line-height=${(-y0).s()}em><br><line-height=${(-ulWidth).s()}em><mspace=0.00001em><u><#0000>`
+    let r=`<line-height=${(-y0).s()}em><br><line-height=${(-ulWidth).s()}em><mspace=0.00001em><u><#0000>`
     for(let y=y0;y<=y1;y+=ulWidth){
         let p0,p1
         with (window.lns) p0=eval(fxs).s()
