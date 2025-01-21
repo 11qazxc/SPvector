@@ -7,74 +7,41 @@
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.<br />
 You should have received a copy of the GNU General Public License along with this program. If not, see https://www.gnu.org/licenses/ .</div>
 </head>
-<script src="./common.js" type="text/javascript"></script>
 <body>
-    <code>#a b</code> sets a to b<br />
-    <code>line x,y,x,y...</code><br />
-    <code>area y0;y1;xs;xf</code> fills area with y0 and y1 being top and buttom edges; xs and xf are expressions to define left and right limits as functions of y<br />
+<script src="./common.js" type="text/javascript"></script>
+<script src="./pieces/line.js" type="text/javascript"></script>
+<script src="./pieces/area.js" type="text/javascript"></script>
+    <div id="desc"><code>#a b</code> sets a to b<br /></div>
     <textarea id="prog" cols="80" rows="24">
-line 0,0, 0,5, 5,5, 5,0, 0,0, 5,5
+#h 5
+line 0,0, 0,h, h,h, h,0, 0,0, h,h
 line 8,4, 6.828,6.828, 4,8, 1.172,6.828, 0,4, 1.172,1.172, 4,0, 6.828,1.172, 8,4
 area 0;5; 10-y;sqrt(1-pow((y-2.5)/2.5,2))*2.5
 area 0;5; 12-y;14-y
     </textarea>
     <div id="applyButton" style="width:50px;height:20px;" onclick="recalculate()">apply</div>
     <input type="text" id="output"></input>
+    <div id="log"></div>
 <script type="text/javascript">
-line_segment=(pa,pb,restoreState)=>{
-    r="";pipeLen=.95;a=atan2(pb[1]-pa[1],pb[0]-pa[0])
-    dx=cos(a)*pipeLen;dy=sin(a)*pipeLen
-    if(dy==0){l=(pb[0]-pa[0])/dx}else if(dx==0){l=(pb[1]-pa[1])/dy}
-    else{l=max((pb[0]-pa[0])/dx,(pb[1]-pa[1])/dy)}
-    l=(l|0)+1
-    sx=pa[0];sy=pa[1]-(.5-.5*sin(a))
-    dx=(pb[0]-pa[0])/l;dy=(pb[1]-pa[1]-dy/l)/l
-    //mspace==0 means mspace's off
-    r+=`<mspace=${dx!=0?dx.s():"0.00001"}em><pos=${sx.s()}em><rotate=${(a/PI*180+90).s()}>`
-    if(pa[1]!==pb[1]){
-        for(let i=0;i<l;(sy+=dy)&&(i+=1)){r+=`<voffset=${sy.s()}em>|`}
-    }else{r+=`<voffset=${sy.s()}em>`+("|".repeat(l))}
-    r+=`</rotate>`
-    if(restoreState!==false){r+=`</voffset></mspace>`}
-    return r
-}
-line=(s)=>{
-    r="";pts=eval("["+s+"]")
-    for(let i=0;(i+3)<pts.length;i+=2){
-        r+=line_segment([pts[i],pts[i+1]],[pts[i+2],pts[i+3]],false)
-    }
-    r+=`</mspace></voffset>`
-    return r
-}
-
-area=(s)=>{
-    const ulWidth=1/13.25;const ulS=" ";const ulF="."
-    args=s.split(";")
-    y0=eval(args[0]);y1=eval(args[1]);fxs=args[2];fxf=args[3]
-    r=`<line-height=${(-y0).s()}em><br><line-height=${(-ulWidth).s()}em><mspace=0.00001em><u><#0000>`
-    for(let y=y0;y<=y1;y+=ulWidth){
-        r+=`<pos=${eval(fxs).s()}em>${ulS}`
-        r+=`<pos=${eval(fxf).s()}em>${ulF}<br>`
-    }
-    r+=`</color></u></mspace><line-height=${(y1-y0).s()}em><br><line-height=1em>`
-    return r
-}
-
-recalculate=()=>{
-    prog=$("[id='prog']").value.split("\n")
-    r="<align=left><size=20%><line-height=1em>"
-    prog.forEach((e)=>{
-        i=e.indexOf(" ")
-        if(i==-1){return}
-        f=e.slice(0,i)
+for(let k in fx){$("[id='desc']").innerHTML+=fx[k].desc+"<br />"}
+$("[id='output']").value=""//clear if page's reloaded
+const recalculate=()=>{
+    $("[id='log']").innerHTML=""
+    let prog=$("[id='prog']").value.split("\n")
+    let r="<align=left><size=20%><line-height=1em>"
+    window.lns={}
+    for(let e of prog){
+        let i=e.indexOf(" ");if(i==-1){return}
+        let f=e.slice(0,i)
         if(f[0]=="#"){
-            console.log(`window.${f.slice(1)}=${e.slice(i+1)}`)
-                   eval(`window.${f.slice(1)}=${e.slice(i+1)}`)}
-        if(f=="line"){r+=line(e.slice(i+1))}
-        if(f=="area"){r+=area(e.slice(i+1))}
-    })
+            with (window.lns) window.lns[f.slice(1)]=eval(`${e.slice(i+1)}`)
+            console.log(`${f.slice(1)}=${e.slice(i+1)}=${window.lns[f.slice(1)]}`)
+            continue
+        }
+        if(fx[f]){r+=fx[f].f(e.slice(i+1));continue}
+        console.error("module not found:\""+f+"\"")
+    }
     $("[id='output']").value=r
 }
-$("[id='output']").value=""//clear if page's reloaded
 </script>
 </body>
