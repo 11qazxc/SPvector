@@ -11,13 +11,16 @@ You should have received a copy of the GNU General Public License along with thi
 <script src="./common.js" type="text/javascript"></script>
 <script src="./pieces/line.js" type="text/javascript"></script>
 <script src="./pieces/area.js" type="text/javascript"></script>
-    <div id="desc"><code>#a b</code> sets a to b<br /></div>
+    <div id="desc"><code>#a b</code> sets a to b<br />
+    <code>// comment</code> does exactly nothing<br /></div>
     <textarea id="prog" cols="80" rows="24">
 #h 5
+#hh h/2
 line 0,0, 0,h, h,h, h,0, 0,0, h,h
 line 8,4, 6.828,6.828, 4,8, 1.172,6.828, 0,4, 1.172,1.172, 4,0, 6.828,1.172, 8,4
-area 0;5; 10-y;sqrt(1-pow((y-2.5)/2.5,2))*2.5
-area 0;5; 12-y;14-y
+area 0;h; sqrt(1-pow((y-hh)/hh,2))*hh;h+(h-y)
+area 0;h; h+2+(h-y);h+4+(h-y)
+area 0;h; h+8+(h-y);h+6+(h-y)
     </textarea>
     <div id="applyButton" style="width:50px;height:20px;" onclick="recalculate()">apply</div>
     <input type="text" id="output"></input>
@@ -31,6 +34,7 @@ const recalculate=()=>{
     let r="<align=left><size=20%><line-height=1em>"
     window.lns={}
     for(let e of prog){
+        if(e.startsWith("//")){continue}if(e.trim()==""){continue}
         let i=e.indexOf(" ");if(i==-1){return}
         let f=e.slice(0,i)
         if(f[0]=="#"){

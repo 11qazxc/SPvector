@@ -4,7 +4,9 @@ window.$=document.querySelector.bind(document)
 Number.prototype.s=function(){return (round(this*1000)/1000).toString()}
 
 window.fx={}//name=>{f:(str)=>str,desc:str}
-
+const TAU=PI*2
+const FLT_MAX=1.7976931348623157E+308
+const FLT_MIN=1/FLT_MAX/(1<<62)
 console._log=console.log;console.log=function(...args){
     let r=args.map(e=>e.toString()).join(" ")
     r="<div>"+r+"</div>"
