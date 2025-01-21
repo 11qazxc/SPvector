@@ -43,7 +43,7 @@ const recalculate=()=>{
         let i=e.indexOf(" ");if(i==-1){return}
         let f=e.slice(0,i)
         if(f[0]=="#"){
-            with (window.lns) window.lns[f.slice(1)]=eval(`${e.slice(i+1)}`)
+            window.lns[f.slice(1)]=nseval(e.slice(i+1),window.lns)
             console.log(`${f.slice(1)}=${e.slice(i+1)}=${window.lns[f.slice(1)]}`)
             continue
         }

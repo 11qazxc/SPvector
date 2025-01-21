@@ -30,3 +30,13 @@ document.body.innerHTML+=`<style>
 .err{background-color:#f008}
 #log > *{border:1px solid}
 </style>`
+
+function nseval(s,...args){
+    let ns={}
+    if(args.length==1){ns=args[0]}
+    else{for(let e of args){for(let k in e){ns[k]=e[k]}}}
+    let r;try{with (ns) r=eval(s);return r}catch(e){
+        console.error("error evaluating \""+s+"\": "+e.toString())
+        return 0
+    }
+}

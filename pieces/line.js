@@ -18,7 +18,7 @@ const line_segment=(pa,pb,restoreState)=>{
     return r
 }
 fx["line"]={f:(s)=>{
-    let r="";let pts;with (window.lns) pts=eval("["+s+"]")
+    let r="";let pts=nseval("["+s+"]",window.lns)
     for(let i=0;(i+3)<pts.length;i+=2){
         r+=line_segment([pts[i],pts[i+1]],[pts[i+2],pts[i+3]],false)
     }
