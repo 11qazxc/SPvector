@@ -23,9 +23,9 @@ raw "<#008F>"
 line 0,0, 0,h, h,h, h,0, 0,0, h,h
 line ...[0,1,2,3,4,5,6,7,8].map(i=>[cos(TAU*i/8)*h+h,sin(TAU*i/8)*h+h]).flat()
 raw "<#0808>"
-area 0;h; sqrt(1-pow((y-hh)/hh,2))*hh;h+(h-y)
-area 0;h; h+1+(h-y);h+2+(h-y)
-area 0;h; h+4+(h-y);h+3+(h-y)
+area 0;h;.05; sqrt(1-pow((y-hh)/hh,2))*hh;h+(h-y)
+area 0;h;.05; h+1+(h-y);h+2+(h-y)
+area 0;h;.05; h+4+(h-y);h+3+(h-y)
     </textarea>
     <div id="applyButton" style="width:50px;height:20px;" onclick="recalculate()">apply</div>
     <input type="text" id="output"></input>
@@ -36,7 +36,7 @@ $("[id='output']").value=""//clear if page's reloaded
 const recalculate=()=>{
     $("[id='log']").innerHTML=""
     let prog=$("[id='prog']").value.split("\n")
-    let r="<align=left><size=20%><line-height=1em>"
+    let r="<align=left><line-height=1em>"
     window.lns={}
     for(let e of prog){
         if(e.startsWith("//")){continue}if(e.trim()==""){continue}
@@ -50,7 +50,7 @@ const recalculate=()=>{
         if(fx[f]){r+=fx[f].f(e.slice(i+1));continue}
         console.error("module not found:\""+f+"\"")
     }
-    $("[id='output']").value=r
+    $("[id='output']").value=r.replaceAll("<","&lt;").replaceAll(">","&gt;")
 }
 </script>
 </body>

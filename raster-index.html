@@ -1,0 +1,152 @@
+<html>
+<head>
+</head>
+<body>
+    <p>mark-based SPRaster. makes USAF roundel 500b shorter but it's useless for real images as-is</p><br />
+    <input type="text" id="filelink" onChange="linkChange();" placeholder="Link to image" autofocus></input>
+    <input type="file" id="filepath" onChange="fileChange();" title="Select local file" accept="image/*"></input><br />
+    <input type="range" id="bpc_input" min="1" max="8" value="8" onChange="$('[id=bpc_input]').title=$('[id=bpc_input]').value.toString()+'bpc'; updateLabel()"></input>Number of bits per color. Same as number of bits per pixel divided by 4. minimum 1, maximum 8. Can be used as poor lossy compression.<br />
+    <input type="text" id="xSize" value="100" onChange="$('[id=xSize]').value=$('[id=xSize]').value.replace(/[^0-9]/gi,'').padStart(1,'0'); updateLabel()">Maximum horizontal size of image in pixels.<br />Vertical size will be changed to save aspect ratio. Note that sometimes link itself already have "size", "width" or something like that.<br />
+    <input type="text" id="bgColor" value="" onChange="$('[id=bgColor]').value=$('[id=bgColor]').value.replace(/[^0-9A-Fa-f]/gi,'').slice(0,6); updateLabel()">Background i.e. color treated as transparent. 24bit hex without leading hash, e.g. <b>10FF80</b>, may be empty.<br />
+    <p id="filename"></p><br /><img id="imageTag" style="display:none" /><canvas id="canvas"></canvas><br /><input type="text" id="textoutput"></input><i id="outputSize"></i><br />Output (i.e. code for label) will be in text field above.<br />
+    <p id="seqLog"></p>
+</body>
+<script>document.getElementById('canvas').height=50;window.$=document.querySelector.bind(document);</script>
+<script type="text/javascript">
+function updateLabel(){img = $("[id=imageTag]");if(!img.complete){img.addEventListener('load',imgLoaded)}else{imgLoaded()}}
+function fileChange(){
+    const file=$("[id=filepath]").files[0]
+    var img = $("[id=imageTag]");
+    img.src = URL.createObjectURL(file);
+    img.crossOrigin = "anonymous";
+    $("[id=filename]").innerHTML = "file: "+file.name;
+    updateLabel()}
+function linkChange(){
+    var img = $("[id=imageTag]");
+    var link = $("[id=filelink]").value;
+    img.src = link;
+    img.crossOrigin = "anonymous";
+    if(link.length<=250&&!link.startsWith("data:")){$("[id=filename]").innerHTML = link;}
+    else{$("[id=filename]").innerHTML = link.substring(0,100)+"...";}
+    updateLabel()}
+
+function hexToColor(s){
+    r=parseInt(s.slice(0,2),16);g=parseInt(s.slice(2,4),16);b=parseInt(s.slice(4,6),16);
+    if(r===r&&r!=undefined&&g===g&&g!=undefined&&b===b&&b!=undefined){return [r,g,b]}
+    else{return undefined}
+}
+Number.prototype.s=function(prec){if(!prec){prec=3}//.001/ulWidth=0.01325px
+    let r=this.toString()+".";
+    r=r.slice(0,r.indexOf(".")+1+prec+1).slice(0,-1)
+    if(r[0]=="-"){while(r.length>2&&r[1]=="0"){r="-"+r.slice(2)}}
+    else{while(r.length>1&&r[0]=="0"){r=r.slice(1)}}
+    while(r.length>1&&r[r.length-1]=="0"){r=r.slice(0,-1)}
+    return r
+}
+function hexbyte(a){return Math.floor(a).toString(16).padStart(2, "0").toUpperCase()}
+function colorStr(r,g,b,a){
+    c=hexbyte(r)+hexbyte(g)+hexbyte(b)+(a==255?"":hexbyte(a))
+    return "<#"+c+">"//mark tag can only understand full bpc color
+    if(c.length>=8){return "<#"+((c[1]==c[0]&&c[3]==c[2]&&c[5]==c[4]&&c[7]==c[6])?c[0]+c[2]+c[4]+c[6]:c)+">"}
+    else{return "<#"+((c[1]==c[0]&&c[3]==c[2]&&c[5]==c[4])?c[0]+c[2]+c[4]:c)+">"}
+    /*if least-significant digits aren't used write it as 16-bit color
+    you can rarely see 16-bit colors in real images but it can save some kilobytes if mask was used*/}
+function rle(a){
+    let res=[],cs=0,cc=a[0]
+    for(let i=0;i<a.length;i++){
+        if(a[i]==cc){continue}
+        res.push([cs,i,cc])
+        cs=i;cc=a[i]
+    }res.push([cs,a.length,cc])
+    return res
+}
+function rle2d(a){
+    let res=[];for(let y=0;y<a.length;y++){res.push(rle(a[y]))}
+    let r2=[]
+    for(let y=0;y<res.length;y++){
+        let u=[];for(let i=0;i<r2.length;i++){u[i]=r2[i][r2[i].length-1].y!=(y-1)}
+        for(let x=0;x<res[y].length;x++){
+            let c=res[y][x],ok=false;c.y=y
+            for(let i=0;i<r2.length;i++){if(u[i]){continue}
+                let cs=r2[i];if(cs[0][2]!=c[2]){continue}
+                cs.push(c);u[i]=1;ok=true;break
+            }if(!ok){r2.push([c]);u.push(1)}
+        }
+    }
+    return r2
+}
+
+function imgLoaded(){
+    var img=$("[id=imageTag]");if(!img.complete){return}
+    let masksh=8-$("[id=bpc_input]").value
+    function maskval(v){
+        let l=(v>>masksh)<<masksh
+        let sh2=8-masksh
+        let r=0
+        for(let i=0;i<8;i+=sh2){r=r|(l>>i)}
+        if(masksh>=4){r=(r&0xf0)|((r&0xf0)>>4)}
+        return r
+    }
+    var xSize=parseInt($("[id=xSize]").value.replace(/[^0-9]/gi,"").padStart(1,"0"),10);
+    var canvas=$("[id=canvas]");var context=canvas.getContext("2d");
+    img.width=Math.min(img.naturalWidth,xSize);img.height=(img.naturalHeight/img.naturalWidth*img.width);
+    canvas.width=img.width;canvas.height=img.height;context.drawImage(img,0,0,img.width,img.height);
+    var imageData=context.getImageData(0,0,img.width,img.height);
+    var bgColor=hexToColor($("[id=bgColor]").value)
+    if(bgColor!=undefined){bgColor=bgColor.map(maskval)}
+    var data=context.createImageData(img.width,img.height)
+    for(let i=0;i<imageData.data.length;i++){data.data[i]=maskval(imageData.data[i])}
+    if(bgColor!=undefined){for(let i=0;i<data.data.length;i+=4){if(data.data[i]==bgColor[0]&&data.data[i+1]==bgColor[1]&&data.data[i+2]==bgColor[2]){data.data[i+3]=0}}}
+    context.putImageData(data,0,0);delete imageData
+    let pxa=[]
+    for(let y=0;y<img.height;y++){
+        let ln=[];pxa.push(ln)
+        for(let x=0;x<img.width;x++){let i=(img.width*y+x)*4
+            let clr=(data.data[i]<<24)|(data.data[i+1]<<16)|(data.data[i+2]<<8)|data.data[i+3]
+            if((clr&255)==0){clr=0}
+            ln.push(clr)
+        }
+    }
+    let seq=rle2d(pxa);delete pxa
+    for(let i=0;i<seq.length;i++){if((seq[i][0][2]&255)==0){seq.splice(i,1);i--}}
+    seq=seq.sort((a,b)=>a[0].y-b[b.length-1].y)
+    for(let i=0;i<seq.length;i++){for(let j=i+1;j<seq.length;j++){
+        let si=seq[i],sj=seq[j];
+        if(si[0][2]!=sj[0][2]){continue}
+        si.push(...sj);seq.splice(j,1);j--
+    }}
+    const pWidth=1/10.5//Roboto font
+    let label=`<mspace=1em><line-height=1em>`
+    let cy=0,cm=0
+    for(let s of seq){
+        let ct="<mark="+colorStr((s[0][2]>>24)&255,(s[0][2]>>16)&255,(s[0][2]>>8)&255,s[0][2]&255).slice(1)
+        /*{//FIXME?
+            let sx=s[0][0];for(let e of s){sx=Math.min(sx,e[0])}
+            let cnt=0;for(let e of s){if(e[0]==sx){cnt++}}
+            if(cnt>2){s.offset=sx}else{s.offset=cm}
+            if(s.offset!=cm){label+=`<margin-left=${s.offset}em>`;cm=s.offset}
+            for(let e of s){e[0]-=cm;e[1]-=cm}
+        }*/
+        for(let e of s){
+            let ny=e.y
+            if(cy>ny||(ny-cy)>9){
+                label+=`<line-height=${ny-cy}em><br><line-height=1em>`}
+            else{label+="<br>".repeat(ny-cy)}
+            if(cy==ny||s.indexOf(e)==0){label+="</mark> "+(e[0]==1?` `:`<pos=${e[0]-1}em> `)+ct+" "}
+            else{label+=e[0]==0?` `:`<pos=${e[0]}em> `}
+            cy=ny
+            label+=(e[1]-e[0])<9?" ".repeat(e[1]-e[0]-1)+".":`<pos=${e[1]}em>.`
+        }
+    }
+    $("[id=seqLog]").innerHTML=seq.map(s=>`${colorStr((s[0][2]>>24)&255,(s[0][2]>>16)&255,(s[0][2]>>8)&255,s[0][2]&255)}:${s.length}:${s[0].y}=>${s[s.length-1].y}`).join("<br>")
+    $("[id=textoutput]").value=label.replaceAll("<","&lt;").replaceAll(">","&gt;");
+    $("[id=outputSize]").textContent=label.length+"symbols;"+seq.length+"sequences";
+    $("[id=canvas]").setAttribute("style","border:2px solid "+colorStr(data.data[4]-data.data[0],data.data[4]-data.data[1],data.data[4]-data.data[2]).slice(1,-1)+";");
+}
+
+//startup with inputs saved by browser
+$("[id=textoutput]").value="";
+if($("[id=filelink]").value.length){linkChange()}
+else if($("[id=filepath]").files[0]){fileChange()}
+</script>
+</html>

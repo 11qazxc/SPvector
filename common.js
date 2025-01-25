@@ -2,6 +2,15 @@ window.$=document.querySelector.bind(document)
 "random,min,max,floor,ceil,round,abs,cos,sin,tan,atan2,PI,log2,sqrt,pow"
     .split(",").map(e=>window[e]=Math[e])
 Number.prototype.s=function(){return (round(this*1000)/1000).toString()}
+Number.prototype.s=function(prec){if(!prec){prec=4}
+    let r=this.toString()+".";
+    r=r.slice(0,r.indexOf(".")+1+prec+1).slice(0,-1)
+    if(r[0]=="-"){while(r.length>2&&r[1]=="0"){r="-"+r.slice(2)}}
+    else{while(r.length>1&&r[0]=="0"){r=r.slice(1)}}
+    while(r.length>1&&r.indexOf(".")!=-1&&r[r.length-1]=="0"){r=r.slice(0,-1)}
+    return r
+}
+String.prototype.s=function(prec){return this}
 
 window.fx={}//name=>{f:(str)=>str,desc:str}
 const TAU=PI*2
@@ -37,6 +46,6 @@ function nseval(s,...args){
     else{for(let e of args){for(let k in e){ns[k]=e[k]}}}
     let r;try{with (ns) r=eval(s);return r}catch(e){
         console.error("error evaluating \""+s+"\": "+e.toString())
-        return 0
+        return s
     }
 }
