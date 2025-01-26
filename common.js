@@ -1,7 +1,7 @@
 window.$=document.querySelector.bind(document)
 "random,min,max,floor,ceil,round,abs,cos,sin,tan,atan2,PI,log2,sqrt,pow"
     .split(",").map(e=>window[e]=Math[e])
-Number.prototype.s=function(){return (round(this*1000)/1000).toString()}
+String.prototype.count=function(a){let c=0;for(var i of this){if(i==a){c++}}return c}
 Number.prototype.s=function(prec){if(!prec){prec=4}
     let r=this.toString()+".";
     r=r.slice(0,r.indexOf(".")+1+prec+1).slice(0,-1)
@@ -39,13 +39,3 @@ document.body.innerHTML+=`<style>
 .err{background-color:#f008}
 #log > *{border:1px solid}
 </style>`
-
-function nseval(s,...args){
-    let ns={}
-    if(args.length==1){ns=args[0]}
-    else{for(let e of args){for(let k in e){ns[k]=e[k]}}}
-    let r;try{with (ns) r=eval(s);return r}catch(e){
-        console.error("error evaluating \""+s+"\": "+e.toString())
-        return s
-    }
-}

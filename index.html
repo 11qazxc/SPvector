@@ -11,6 +11,7 @@ You should have received a copy of the GNU General Public License along with thi
 note: all functions are for Roboto font and perhaps it won't work with other fonts;<br />
 Y+ is upwards and X+ is rightwards
 <script src="./common.js" type="text/javascript"></script>
+<script src="./eval.js" type="text/javascript"></script>
 <script src="./pieces/raw.js" type="text/javascript"></script>
 <script src="./pieces/line.js" type="text/javascript"></script>
 <script src="./pieces/area.js" type="text/javascript"></script>
@@ -28,7 +29,7 @@ area 0;h;.05; h+1+(h-y);h+2+(h-y)
 area 0;h;.05; h+4+(h-y);h+3+(h-y)
     </textarea>
     <div id="applyButton" style="width:50px;height:20px;" onclick="recalculate()">apply</div>
-    <input type="text" id="output"></input>
+    <input type="text" id="output"></input><p id="outLen"></p>
     <div id="log"></div>
 <script type="text/javascript">
 for(let k in fx){$("[id='desc']").innerHTML+=fx[k].desc+"<br />"}
@@ -51,6 +52,7 @@ const recalculate=()=>{
         console.error("module not found:\""+f+"\"")
     }
     $("[id='output']").value=r.replaceAll("<","&lt;").replaceAll(">","&gt;")
+    $("[id='outLen']").innerHTML=r.length+"symbols"
 }
 </script>
 </body>
