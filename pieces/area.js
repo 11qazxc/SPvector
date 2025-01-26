@@ -4,7 +4,7 @@ fx["area"]={f:(s)=>{
     let y0=nseval(args[0],window.lns)-.5*ulWidth,y1=nseval(args[1],window.lns)-.5*ulWidth
         ,dy=nseval(args[2],window.lns)
         ,fxs=args[3],fxf=args[4]
-        ,scale=args.length>=5?nseval(args[5],window.lns):1
+        ,scale=args.length>5?nseval(args[5],window.lns):1
     dy=min(dy*scale,ulWidth);y1=(y1-y0)*scale+y0
     let r=`<line-height=${(-y0).s(5)}em><br><line-height=${(-dy).s(6)}em><mspace=0.00001em><u><#0000>`
     let cns={};for(let k in window.lns){cns[k]=window.lns[k]}
