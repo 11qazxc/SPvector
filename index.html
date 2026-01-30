@@ -10,11 +10,6 @@ You should have received a copy of the GNU General Public License along with thi
 <body>
 note: all functions are for Roboto font and perhaps it won't work with other fonts;<br />
 Y+ is upwards and X+ is rightwards
-<script src="./common.js" type="text/javascript"></script>
-<script src="./eval.js" type="text/javascript"></script>
-<script src="./pieces/raw.js" type="text/javascript"></script>
-<script src="./pieces/line.js" type="text/javascript"></script>
-<script src="./pieces/area.js" type="text/javascript"></script>
     <div id="desc"><code>#a b</code> sets a to b<br />
     <code>// comment</code> does exactly nothing<br /></div>
     <textarea id="prog" cols="80" rows="24">
@@ -22,7 +17,7 @@ Y+ is upwards and X+ is rightwards
 #hh h/2
 raw "<#008F>"
 line 0,0, 0,h, h,h, h,0, 0,0, h,h
-line ...[0,1,2,3,4,5,6,7,8].map(i=>[cos(TAU*i/8)*h+h,sin(TAU*i/8)*h+h]).flat()
+//line ...[0,1,2,3,4,5,6,7,8].map(i=>[cos(TAU*i/8)*h+h,sin(TAU*i/8)*h+h]).flat()
 raw "<#0808>"
 area 0;h;.05; sqrt(1-pow((y-hh)/hh,2))*hh;h+(h-y)
 area 0;h;.05; h+1+(h-y);h+2+(h-y)
@@ -31,6 +26,12 @@ area 0;h;.05; h+4+(h-y);h+3+(h-y)
     <div id="applyButton" style="width:50px;height:20px;" onclick="recalculate()">apply</div>
     <input type="text" id="output"></input><p id="outLen"></p>
     <div id="log"></div>
+<script src="./common.js" type="text/javascript"></script>
+<script src="https://11qazxc.github.io/CPFT/cpft.js" type="text/javascript"></script>
+<script src="./eval.js" type="text/javascript"></script>
+<script src="./pieces/raw.js" type="text/javascript"></script>
+<script src="./pieces/line.js" type="text/javascript"></script>
+<script src="./pieces/area.js" type="text/javascript"></script>
 <script type="text/javascript">
 for(let k in fx){$("[id='desc']").innerHTML+=fx[k].desc+"<br />"}
 $("[id='output']").value=""//clear if page's reloaded
@@ -40,8 +41,8 @@ const recalculate=()=>{
     let r="<align=left><line-height=1em>"
     window.lns={}
     for(let e of prog){
-        if(e.startsWith("//")){continue}if(e.trim()==""){continue}
-        let i=e.indexOf(" ");if(i==-1){return}
+        if(e.startsWith("//")||(e=e.trim())==""){continue}
+        let i=e.indexOf(" ");if(i==-1){continue}
         let f=e.slice(0,i)
         if(f[0]=="#"){
             window.lns[f.slice(1)]=nseval(e.slice(i+1),window.lns)
@@ -51,7 +52,7 @@ const recalculate=()=>{
         if(fx[f]){r+=fx[f].f(e.slice(i+1));continue}
         console.error("module not found:\""+f+"\"")
     }
-    $("[id='output']").value=r.replaceAll("<","&lt;").replaceAll(">","&gt;")
+    $("[id='output']").value=r//.replaceAll("<","&lt;").replaceAll(">","&gt;")
     $("[id='outLen']").innerHTML=r.length+"symbols"
 }
 </script>

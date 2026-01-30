@@ -19,13 +19,15 @@ function parseDesmosTex(s){//not correct but it's something
 }
 
 function nseval(s,...args){
-    let isTex=s.indexOf("{")!=-1
-    if(isTex){s=parseDesmosTex(s)}
+    if(s instanceof SPFT.enode){s=s.copy()}
+    else if((typeof s)=="string"){
+        const isTex=s.indexOf("{")!=-1
+        if(isTex){s=parseDesmosTex(s)}
+        s=SPFT.parse(s)
+    }
     let ns={}
     if(args.length==1){ns=args[0]}
     else{for(let e of args){for(let k in e){ns[k]=e[k]}}}
-    let r;try{with (ns) r=eval(s);return r}catch(e){
-        console.error("error evaluating "+(isTex?"tex":"js")+" \""+s+"\": "+e.toString())
-        return s
-    }
+    s=s.replaceD(ns)
+    return s.eval()
 }
