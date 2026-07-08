@@ -21,7 +21,7 @@ function parseDesmosTex(s){//not correct but it's something
 function nseval(s,...args){
     if(s instanceof SPFT.enode){s=s.copy()}
     else if((typeof s)=="string"){
-        const isTex=s.indexOf("{")!=-1
+        const isTex=s.indexOf("{")!=-1||(s.indexOf("\\left")!=-1&&s.indexOf("\\right")!=-1)
         if(isTex){s=parseDesmosTex(s)}
         s=SPFT.parse(s)
     }

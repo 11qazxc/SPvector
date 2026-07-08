@@ -24,4 +24,4 @@ fx["area"]={f:(s)=>{
     r+=`</color></u></mspace><line-height=${ftfmt(nseval("i*dy+y0",cns))}em><br><line-height=1em>`
     return r
 },
-desc:"<code>area y0;y1;dy;xs;xf</code> fills area; y0 and y1 are top and bottom edges and dy is vertical step (no more than 1/13.25); xs and xf are expressions to define left and right limits"}
+desc:"<code>area y0;y1;dy;xs;xf</code> fills area; y0 and y1 are top and bottom edges (y0 must be less than y1) and dy is vertical step (no more than 1/13.25); xs and xf are expressions to define left and right limits"}
